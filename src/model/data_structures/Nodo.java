@@ -1,4 +1,4 @@
-	package model.logic;
+	package src.model.data_structures;
 
 public class Nodo<r> 
 {
@@ -12,7 +12,7 @@ public class Nodo<r>
 	{
 		siguienteNodo = null;
 		anteriorNodo = null;
-		this.item = elemento;
+		this.item = (r) elemento;
 	}
 	
 	public r darItem()

@@ -9,7 +9,9 @@ import com.opencsv.CSVReader;
 
 import src.model.data_structures.ArregloDinamico;
 import src.model.data_structures.Cola;
+import src.model.data_structures.DoublyLinkedList;
 import src.model.data_structures.IArregloDinamico;
+import src.model.data_structures.Nodo;
 import src.model.data_structures.Pila;
 
 import java.io.FileNotFoundException;
@@ -32,7 +34,9 @@ public class MVCModelo <Integer extends Comparable<Integer>>
 	 */
 
 
-	private DoublyLinkedList datos;
+	private DoublyLinkedList<Viaje> datosHora;
+	private DoublyLinkedList<Viaje> datosDiaDeSemana;
+	private DoublyLinkedList<Viaje> datosMes;
 	
 
 
@@ -44,7 +48,9 @@ public class MVCModelo <Integer extends Comparable<Integer>>
 	public MVCModelo()
 	{
 
-		datos = new DoublyLinkedList<>();
+		datosHora = new DoublyLinkedList<>();
+		datosDiaDeSemana = new DoublyLinkedList<>();
+		datosMes = new DoublyLinkedList<>();
 		
 	}
 
@@ -56,9 +62,24 @@ public class MVCModelo <Integer extends Comparable<Integer>>
 	 * Servicio de consulta de numero de elementos presentes en el modelo 
 	 * @return numero de elementos presentes en el modelo
 	 */
-	public int darTamano()
+	public int darTamano(String tipo)
 	{
-		return datos.darSize();
+		if(tipo.compareTo("mes")==0)
+		{
+			return datosMes.darSize();
+		}
+		else if(tipo.compareTo("dia")==0)
+		{
+			return datosDiaDeSemana.darSize();
+		}
+		else if(tipo.compareTo("hora")==0)
+		{
+			return datosHora.darSize();
+		}
+		else
+		{
+			return -1;
+		}
 	}
 
 	/**

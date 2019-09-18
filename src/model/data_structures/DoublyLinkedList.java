@@ -1,31 +1,11 @@
-package model.logic;
-
-import static org.junit.Assert.assertArrayEquals;
-
-
-/**
- * ~~~~~~~~~~~~~~~~~~~~~~~
- * $Id$
- * Universidad de los Andes (Bogotï¿½ - Colombia)
- * Departamento de Ingenierï¿½a de Sistemas y Computaciï¿½n 
- * Licenciado bajo el esquema Academic Free License version 2.1 
- *
- * Proyecto Cupi2 (http://cupi2.uniandes.edu.co)
- * Framework: Cupi2Collections
- * Autor: Pablo Barvo - 9-May-2006
- * ~~~~~~~~~~~~~~~~~~~~~~~~
- */
+package src.model.data_structures;
 
 import java.io.Serializable;
-import java.util.Iterator;
 
-import com.sun.corba.se.impl.logging.IORSystemException;
-import Nodo.java;
-/**
- * Lista doblemente encadenada con cabeza y cola
- * @param <T> Tipo de datos a almacenar en la lista
- */
-public class DoublyLinkedList<r> implements Serializable
+import src.model.logic.NoExisteException;
+import src.model.data_structures.Nodo;
+
+public class DoublyLinkedList<r> implements Serializable, IDoublyLinkedList<r>
 {
     // -----------------------------------------------------------------
     // Constantes
@@ -65,7 +45,8 @@ public class DoublyLinkedList<r> implements Serializable
     {
         primerNodo = null;
         ultimoNodo = null;
-        size = 0; 
+        size = 0;
+         
     }
 
     // -----------------------------------------------------------------
@@ -80,7 +61,8 @@ public class DoublyLinkedList<r> implements Serializable
      */
     public void añadirPrimero(r item)
     {
-    	Nodo<r> nodo = new Nodo(item);	
+    	@SuppressWarnings({ "unchecked", "rawtypes" })
+		Nodo<r> nodo = new Nodo(item);	
     	if( primerNodo == null)
         {
             primerNodo = nodo;
@@ -121,11 +103,13 @@ public class DoublyLinkedList<r> implements Serializable
         
     }
     
-    public void añadirDespues(Nodo nodoPrevio, Nodo nodoNuevo)
+    @SuppressWarnings("unchecked")
+	public void añadirDespues(Nodo nodoPrevio, Nodo nodoNuevo)
     {
     	if(nodoPrevio.darSiguiente()!=null)
     	{
-    		Nodo aux = nodoPrevio.darSiguiente();
+    		@SuppressWarnings("rawtypes")
+			Nodo aux = nodoPrevio.darSiguiente();
         	nodoNuevo.cambiarSiguiente(aux);
         	aux.cambiarAnterior(nodoNuevo);
         	nodoPrevio.cambiarSiguiente(nodoNuevo);
@@ -139,7 +123,8 @@ public class DoublyLinkedList<r> implements Serializable
     	size++;
     }
     
-    public void añadirAntes(Nodo nodoPosterior, Nodo nodoNuevo)
+    @SuppressWarnings("unchecked")
+	public void añadirAntes(Nodo nodoPosterior, Nodo nodoNuevo)
     {
     	if(nodoPosterior.darAnterior()!=null)
     	{
@@ -218,7 +203,7 @@ public class DoublyLinkedList<r> implements Serializable
      * @param nodo Nodo a ser eliminado de la lista<br>
      * @throws NoExisteException El nodo especificado no pertenece a la lista<br>
      */
-    public r eliminar( Nodo<r> nodo ) throws NoExisteException
+    public void eliminar( Nodo<r> nodo ) throws NoExisteException
     {
         if( buscarNodo( nodo.darItem() ) == null ) throw new NoExisteException( "El nodo especificado no pertenece a la lista" );
         else if( primerNodo == nodo )
@@ -246,7 +231,7 @@ public class DoublyLinkedList<r> implements Serializable
         	z.cambiarAnterior(x);
         }
         size--;
-        return nodo.darItem();
+        
     }
 
     /**
@@ -280,7 +265,7 @@ public class DoublyLinkedList<r> implements Serializable
      * tiene nodos se retorna null.
      * @return Elemento del nodo eliminado
      */
-    public r eliminarUltimo( )
+    public void eliminarUltimo( )
     {
     	if(ultimoNodo!=null)
     	{

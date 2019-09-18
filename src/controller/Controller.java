@@ -1,5 +1,4 @@
-
-
+package src.controller;
 import java.util.Scanner;
 
 import src.model.logic.MVCModelo;
