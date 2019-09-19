@@ -302,29 +302,36 @@ public class MVCModelo <Integer extends Comparable<Integer>>
 		}
 	}
 	
-	public void compararTiemposZonasMes(double zonaAComparar, double zonaMenor, double zonaMayor, double month)
+	public void tresC(int destino, int origen )
 	{
-		boolean centinelaTrimestre = false;
-		for(int i=0;i<4&&!centinelaTrimestre;i++)
+		int cantidadminutos=0;
+		String asteriscos="";
+		boolean hay=false;
+		MVCView.printMessage("Aproximación en minutos de viajes entre zona origen y zona destino. ");
+		MVCView.printMessage("Trimestre "+darTrimestre()+"del 2018 detallado por cada hora del día");
+		MVCView.printMessage("Zona Origen: "+origen+" Zona Destino: "+destino);
+		MVCView.printMessage("Hora|  # de minutos");
+		for (int i=0;i<viajes.dar(HORA).darLongitud();i++)
 		{
-			
-			Nodo nodoActual = trimestresDia.get(i).darPrimero();
-			while(nodoActual!=null)
+			if(viajes.dar(HORA).dar(i).getDstid()==destino)
 			{
-				Viaje viajeActual = (Viaje) nodoActual.darItem();
-				if(viajeActual.darDate()==month	)
+				if(viajes.dar(HORA).dar(i).getSourceid()==destino)
 				{
-					centinelaTrimestre = true;
-					
-					if(viajeActual.darSourceid()>zonaMenor&&viajeActual.darSourceid()<zonaMayor&&viajeActual.darDstid()>zonaMenor&&viajeActual.darDstid()<zonaMayor)
-					{
-						if(viajeActual.darDstid()==zonaAComparar)
-						{
-							
-						}
-					}
+					cantidadminutos=(int) (viajes.dar(HORA).dar(i).getMean_travel_time()/60);
+					hay=true;
 				}
-				nodoActual = nodoActual.darSiguiente();
+			}
+			for(int j=0;j<cantidadminutos;j++)
+			{
+			asteriscos=asteriscos+"*";
+			}
+			if(hay==true)
+			{
+				MVCView.printMessage(viajes.dar(HORA).dar(i).getHod()+"|"+asteriscos);
+			}
+			else
+			{
+				MVCView.printMessage(viajes.dar(HORA).dar(i).getHod()+"| Hora sin viajes");	
 			}
 		}
 	}
