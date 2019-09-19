@@ -4,6 +4,7 @@ package src.model.logic;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import com.opencsv.CSVReader;
 
@@ -13,6 +14,7 @@ import src.model.data_structures.DoublyLinkedList;
 import src.model.data_structures.IArregloDinamico;
 import src.model.data_structures.Nodo;
 import src.model.data_structures.Pila;
+import src.view.MVCView;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -34,10 +36,10 @@ public class MVCModelo <Integer extends Comparable<Integer>>
 	 */
 
 
-	private DoublyLinkedList<Viaje> datosHora;
-	private DoublyLinkedList<Viaje> datosDiaDeSemana;
-	private DoublyLinkedList<Viaje> datosMes;
-	
+	ArrayList<DoublyLinkedList<Viaje>> trimestresHora;
+	ArrayList<DoublyLinkedList<Viaje>> trimestresDia; 
+	ArrayList<DoublyLinkedList<Viaje>> trimestresMes;
+
 
 
 
@@ -47,11 +49,15 @@ public class MVCModelo <Integer extends Comparable<Integer>>
 	 */
 	public MVCModelo()
 	{
-
-		datosHora = new DoublyLinkedList<>();
-		datosDiaDeSemana = new DoublyLinkedList<>();
-		datosMes = new DoublyLinkedList<>();
-		
+		trimestresHora = new ArrayList<>();
+		trimestresDia = new ArrayList<>(); 
+		trimestresMes = new ArrayList<>();
+		for(int i = 0; i<4;i++)
+		{
+			trimestresHora.add(new DoublyLinkedList<>());
+			trimestresDia.add(new DoublyLinkedList<>());
+			trimestresMes.add(new DoublyLinkedList<>());
+		}
 	}
 
 
@@ -61,20 +67,28 @@ public class MVCModelo <Integer extends Comparable<Integer>>
 	/**
 	 * Servicio de consulta de numero de elementos presentes en el modelo 
 	 * @return numero de elementos presentes en el modelo
+	 * tipo: Tipo de fecha (Mes, Dia, Hora).
+	 * trimestre: Trimestre del cual se quiere consultar el tamaño.
 	 */
-	public int darTamano(String tipo)
+	public int darTamano(int trimestre, String tipo)
 	{
 		if(tipo.compareTo("mes")==0)
 		{
-			return datosMes.darSize();
+			int n = trimestre-1;
+			int m = trimestresMes.get(n).darSize();
+			return m;
 		}
 		else if(tipo.compareTo("dia")==0)
 		{
-			return datosDiaDeSemana.darSize();
+			int n = trimestre-1;
+			int m = trimestresDia.get(n).darSize();
+			return m;
 		}
 		else if(tipo.compareTo("hora")==0)
 		{
-			return datosHora.darSize();
+			int n = trimestre-1;
+			int m = trimestresHora.get(n).darSize();
+			return m;
 		}
 		else
 		{
@@ -82,118 +96,250 @@ public class MVCModelo <Integer extends Comparable<Integer>>
 		}
 	}
 
-	/**
-	 * Requerimiento de agregar dato
-	 * @param dato
-	 */
-	public void agregar(String dato)
-	{	
-		datos.añadirUltimo(dato);
-	}
 
-	/**
-	 * Requerimiento buscar dato
-	 * @param dato Dato a buscar
-	 * @return dato encontrado
-	 */
-	public String buscar(String dato)
+	public void cargar(int trimestre, String date) throws Exception
 	{
-		return datos.buscarNodo(dato).toString();
-	}
+		CSVReader reader;
 
-	/**
-	 * Requerimiento eliminar dato
-	 * @param dato Dato a eliminar
-	 * @return dato eliminado
-	 */
-	public String eliminar(String dato)
-	{
-		return datos.eliminar(datos.buscarNodo(dato)).toString();
-	}
-
-
-	public static void read(String[] args) {
-
-		CSVReader reader = null;
-		try {
-
-			reader = new CSVReader(new FileReader("./data/ bogota-cadastral-2018-1-All-MonthlyAggregate.csv"));
-			for(String[] nextLine : reader) {
-				nextLine[0].split(",");
-				System.out.println("col1: " + nextLine[0] + ", col2: "+ nextLine[1]);
+		if(date.equals("mes"))
+		{
+			for(int i = 1; i < 5; i++)
+			{
+				if(trimestre==i)
+				{
+					reader = new CSVReader(new FileReader("./data/bogota-cadastral-2018-"+i+"-All-MonthlyAggregate.csv"));
+					String [] nextLine=reader.readNext();
+					while (nextLine != null) 
+					{
+						trimestresMes.get(i).añadirUltimo(new Viaje(nextLine[0],nextLine[1],nextLine[2],nextLine[3],nextLine[4],nextLine[5], nextLine[6]));
+						nextLine = reader.readNext();
+					}
+				} 
 			}
+		}
 
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} finally{
-			if (reader != null) {
-				try {
-					reader.close();
-				} catch (IOException e) {
-					e.printStackTrace();
+		else if(date.equals("dia"))
+		{
+			for(int i = 1; i < 5; i++)
+			{
+				if(trimestre==i)
+				{
+					reader = new CSVReader(new FileReader("./data/bogota-cadastral-2018-"+i+"-All-WeeklyAggregate.csv"));
+					String [] nextLine=reader.readNext();
+					while (nextLine != null) 
+					{
+						trimestresDia.get(i).añadirUltimo(new Viaje(nextLine[0],nextLine[1],nextLine[2],nextLine[3],nextLine[4],nextLine[5], nextLine[6]));
+						nextLine = reader.readNext();
+					}
 				}
 			}
-
 		}
-	}
-
-	public void cargarDatos(String pRuta) throws NumberFormatException, IOException
-	{
-		String archCSV = pRuta;
-		CSVReader csvReader = new CSVReader(new FileReader(archCSV));
-		String[] fila = null;
-		int cont=0;
-		Nodo primerNodo;
-		Nodo temp= datos.darPrimero();
-		while((fila = csvReader.readNext()) != null) 
+		
+		else if(date.equals("hora"))
 		{
-			int cantidadDeViajes= 0;
-			if(cont<1)
+			for(int i = 1; i < 5; i++)
 			{
-				cont++;
+				if(trimestre==i)
+				{
+					reader = new CSVReader(new FileReader("./data/bogota-cadastral-2018-"+i+"-All-HourlyAggregate.csv"));
+					String [] nextLine=reader.readNext();
+					while (nextLine != null) 
+					{
+						trimestresHora.get(i).añadirUltimo(new Viaje(nextLine[0],nextLine[1],nextLine[2],nextLine[3],nextLine[4],nextLine[5], nextLine[6]));
+						nextLine = reader.readNext();
+					}
+				}
 			}
-			else if (temp==null)
-			{
-				double sa = Double.parseDouble(fila[0]);
-				cantidadDeViajes++;
-				temp = new Nodo(Double.parseDouble(fila[0]));
-			}
-			else 
-			{
-				cantidadDeViajes++;
-				temp=temp.darSiguiente();
-				temp = new Nodo(Double.parseDouble(fila[0]));
-			}
-
+			
 		}
-	}
-
-	public int totalViajesPila() throws IOException
-	{
-		int respuesta =0;
-		String archCSV = "./data/bogota-cadastral-2018-1-All-HourlyAggregate.csv";
-		CSVReader csvReader = new CSVReader(new FileReader(archCSV));
-		String[] fila = null;
-		while((fila = csvReader.readNext()) != null) 
+		else
 		{
-			respuesta ++;
-
+			throw new Exception("Revisar si se introdujo mal el trimestre o la informacion de mes, dia, hora (asegurarse de que esta en minuscula)");
 		}
-		return respuesta;
 	}
-
-	public int totalViajesCola() throws IOException
+	
+	public void consultarTiempoPromedioDesviaciónEstandarMes(int destino, int origen, double month)
 	{
-		int respuesta =0;
-		String archCSV = "./data/bogota-cadastral-2018-1-All-HourlyAggregate.csv";
-		CSVReader csvReader = new CSVReader(new FileReader(archCSV));
-		String[] fila = null;
-		while((fila = csvReader.readNext()) != null) 
+		boolean centinela = false;
+		for(int i = 0; i<4&&!centinela ; i++)
 		{
-			respuesta ++;
-
+			Nodo nodoActual = trimestresMes.get(i).darPrimero();
+			while(nodoActual!=null&&!centinela)
+			{
+				Viaje viajeActual = (Viaje) nodoActual.darItem();
+				if(viajeActual.darDate()==month)
+				{
+					if(viajeActual.darDstid()==destino&&viajeActual.darSourceid()==origen)
+					{
+						String mtt = "" + viajeActual.darMean_travel_time();
+						String gsdtt = "" + viajeActual.darGeometricStandardDeviationTravelTime();
+						MVCView.printMessage("El tiempo promedio es "+mtt+", su desviacion estandar es "+gsdtt);
+						centinela=true;
+					}
+				}
+				nodoActual = nodoActual.darSiguiente();
+			}
 		}
-		return respuesta;
+		if(centinela = false)
+		{
+			MVCView.printMessage("No se encontro dicho objeto.");
+		}
 	}
+	
+	public void consultarTiempoPromedioDesviaciónEstandarDia(int destino, int origen, double dow)
+	{
+		boolean centinela = false;
+		for(int i = 0; i<4&&!centinela ; i++)
+		{
+			Nodo nodoActual = trimestresDia.get(i).darPrimero();
+			while(nodoActual!=null&&!centinela)
+			{
+				Viaje viajeActual = (Viaje) nodoActual.darItem();
+				if(viajeActual.darDate()==dow)
+				{
+					if(viajeActual.darDstid()==destino&&viajeActual.darSourceid()==origen)
+					{
+						String mtt = "" + viajeActual.darMean_travel_time();
+						String gsdtt = "" + viajeActual.darGeometricStandardDeviationTravelTime();
+						MVCView.printMessage("El tiempo promedio es "+mtt+", su desviacion estandar es "+gsdtt);
+						centinela=true;
+					}
+				}
+				nodoActual = nodoActual.darSiguiente();
+			}
+		}
+		if(centinela = false)
+		{
+			MVCView.printMessage("No se encontro dicho objeto.");
+		}
+	}
+	
+	public void nViajesMayorTiempoPromedioMes(int n, int month)
+	{		
+		Viaje[] mayores = new Viaje[n];
+		
+		for(int i = 0; i<4; i++)
+		{
+			Nodo nodoActual = trimestresMes.get(i).darPrimero();
+			while(nodoActual!=null)
+			{
+				Viaje viajeActual = (Viaje) nodoActual.darItem();
+				if(viajeActual.darDate()==month)
+				{
+					boolean centinela = false;
+					for(int j = 0; j<n&&!centinela;j++)
+					{
+						if(mayores[j]==null)
+						{
+							mayores[j]=viajeActual;
+							centinela = true;
+							
+						}
+						else if(mayores[j].darGeometric_mean_travel_time()<viajeActual.darGeometric_mean_travel_time())
+						{
+							mayores[j]=viajeActual;
+							centinela=true;
+						}
+					}
+				}
+				nodoActual = nodoActual.darSiguiente();
+			}
+		}
+		
+		MVCView.printMessage("Los viajes con mayor tiempo promedio son:");
+		for(int k = 0; k<n; k++)
+		{
+			Viaje z = mayores[k];
+			String zO= "" + z.darSourceid();
+			String zD= "" + z.darDstid();
+			String zProm = "" +z.darGeometric_mean_travel_time();
+			String zDes = "" + z.darGeometricStandardDeviationTravelTime();
+			MVCView.printMessage("EL viaje con zona de origen "+zO+", zona de destino "+zD+", el tiempo promedio de viaje fue "+zProm+"+/-"+zDes);
+		}
+	}
+	
+	public void nViajesMayorTiempoPromedioDia(int n, int dow)
+	{		
+		Viaje[] mayores = new Viaje[n];
+		
+		for(int i = 0; i<4; i++)
+		{
+			Nodo nodoActual = trimestresDia.get(i).darPrimero();
+			while(nodoActual!=null)
+			{
+				Viaje viajeActual = (Viaje) nodoActual.darItem();
+				if(viajeActual.darDate()==dow	)
+				{
+					boolean centinela = false;
+					for(int j = 0; j<n&&!centinela;j++)
+					{
+						if(mayores[j]==null)
+						{
+							mayores[j]=viajeActual;
+							centinela = true;
+							
+						}
+						else if(mayores[j].darGeometric_mean_travel_time()<viajeActual.darGeometric_mean_travel_time())
+						{
+							mayores[j]=viajeActual;
+							centinela=true;
+						}
+					}
+				}
+				nodoActual = nodoActual.darSiguiente();
+			}
+		}
+		
+		MVCView.printMessage("Los viajes con mayor tiempo promedio son:");
+		for(int k = 0; k<n; k++)
+		{
+			Viaje z = mayores[k];
+			String zO= "" + z.darSourceid();
+			String zD= "" + z.darDstid();
+			String zProm = "" +z.darGeometric_mean_travel_time();
+			String zDes = "" + z.darGeometricStandardDeviationTravelTime();
+			MVCView.printMessage("EL viaje con zona de origen "+zO+", zona de destino "+zD+", el tiempo promedio de viaje fue "+zProm+"+/-"+zDes);
+		}
+	}
+	
+	public void compararTiemposZonasMes(double zonaAComparar, double zonaMenor, double zonaMayor, double month)
+	{
+		boolean centinelaTrimestre = false;
+		for(int i=0;i<4&&!centinelaTrimestre;i++)
+		{
+			
+			Nodo nodoActual = trimestresDia.get(i).darPrimero();
+			while(nodoActual!=null)
+			{
+				Viaje viajeActual = (Viaje) nodoActual.darItem();
+				if(viajeActual.darDate()==month	)
+				{
+					centinelaTrimestre = true;
+					
+					if(viajeActual.darSourceid()>zonaMenor&&viajeActual.darSourceid()<zonaMayor&&viajeActual.darDstid()>zonaMenor&&viajeActual.darDstid()<zonaMayor)
+					{
+						if(viajeActual.darDstid()==zonaAComparar)
+						{
+							
+						}
+					}
+				}
+				nodoActual = nodoActual.darSiguiente();
+			}
+		}
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 }

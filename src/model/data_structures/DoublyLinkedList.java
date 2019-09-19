@@ -1,6 +1,7 @@
 package src.model.data_structures;
 
 import java.io.Serializable;
+import java.util.Iterator;
 
 import src.model.logic.NoExisteException;
 import src.model.data_structures.Nodo;
@@ -289,6 +290,18 @@ public class DoublyLinkedList<r> implements Serializable, IDoublyLinkedList<r>
         size = 0;
        
     }
+
+	@Override
+	public Iterator<r> iterator() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void añadir(Comparable item) {
+		// TODO Auto-generated method stub
+		
+	}
 
     
     
